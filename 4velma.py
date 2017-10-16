@@ -12,4 +12,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     viewer = Viewer(args.input, args.duration)
+    viewer.full_screen()
     viewer.run()

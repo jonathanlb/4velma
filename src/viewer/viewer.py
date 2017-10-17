@@ -16,14 +16,19 @@ class Viewer:
     tk_image = None
     width = None
 
-    def __init__(self, directory, seconds, log_level=logging.INFO, tk_root=None):
+    def __init__(self, directory, seconds, full_screen=False, log_level=logging.INFO, tk_root=None):
         self.directory = directory
         self.seconds = seconds
         if tk_root:
             self.root = tk_root
         else:
             self.root = tk.Tk()
+
+        if full_screen:
             self.root.wm_overrideredirect(True)
+            self.width = self.root.winfo_screenwidth()
+            self.height = self.root.winfo_screenheight()
+
         # TODO: no global config
         logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
                             level=log_level)
@@ -56,10 +61,6 @@ class Viewer:
         else:
             self.tk_image = ImageTk.PhotoImage(self.image)
             self.panel.configure(image=self.tk_image)
-
-    def full_screen(self):
-        self.width = self.root.winfo_screenwidth()
-        self.height = self.root.winfo_screenheight()
 
     def get_filenames(self):
         """Scan the image directory for image file names."""

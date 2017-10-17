@@ -67,20 +67,30 @@ class Viewer:
         p = Path(self.directory)
         return [x for x in p.iterdir() if not x.is_dir() and self._is_image_(x)]
 
-    def next_image(self):
+    def next_image(self, idx=None):
         """Load the next image in the directory using the current view of the directory."""
         filenames = self.get_filenames()
-        # Prevent out-of-bounds when files are removed.
-        self.image_idx = self.image_idx % len(filenames)
-        filename = filenames[self.image_idx]
-        logging.debug(('loading image', filename, self.image_idx))
-        img = Image.open(filename)
-        self.image_idx = (self.image_idx + 1) % len(filenames)
-        return img
 
-    def resize_image(self):
+        if idx is None:
+            # Prevent out-of-bounds when files are removed.
+            self.image_idx = self.image_idx % len(filenames)
+            idx = self.image_idx
+            self.image_idx = (self.image_idx + 1) % len(filenames)
+
+        filename = filenames[idx]
+        logging.debug(('loading image', filename, idx))
+        return Image.open(filename)
+
+    def resize_image(self, image=None):
         """TODO: ensure aspect ratio is preserved."""
-        return self.image.resize((self.width, self.height), Image.BICUBIC)
+        if image is None:
+            image = self.image
+        image_ratio = image.height / image.width
+        viewer_ratio = self.height / self.width
+        if image_ratio < viewer_ratio:
+            return image.resize((int(image_ratio * self.height), self.height), Image.BICUBIC)
+        else:
+            return image.resize((self.width, int(image_ratio * self.width)), Image.BICUBIC)
 
     def resize_window(self, event):
         """

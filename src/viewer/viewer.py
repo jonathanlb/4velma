@@ -23,11 +23,14 @@ class Viewer:
             self.root = tk_root
         else:
             self.root = tk.Tk()
+            self.root.bind('<Key>', self.handle_keypress)
 
         if full_screen:
             self.root.wm_overrideredirect(True)
             self.width = self.root.winfo_screenwidth()
             self.height = self.root.winfo_screenheight()
+
+        self.root.configure(bg='black', highlightthickness=0)
 
         # TODO: no global config
         logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
@@ -67,6 +70,12 @@ class Viewer:
         p = Path(self.directory)
         return [x for x in p.iterdir() if not x.is_dir() and self._is_image_(x)]
 
+    def handle_keypress(self, event):
+        """Allow the user to quit with Q/q."""
+        logging.debug(('click', event, event.char))
+        if event.char.lower() == 'q':
+            self.root.quit()
+
     def next_image(self, idx=None):
         """Load the next image in the directory using the current view of the directory."""
         filenames = self.get_filenames()
@@ -94,15 +103,15 @@ class Viewer:
 
     def resize_window(self, event):
         """
-        Respond to tkinter resizing events, clipping by mysterious magic number
-        to prevent cascade of resize events.
+        Respond to tkinter resizing events.
         """
-        self.width = event.width - 4
-        self.height = event.height - 4
+        self.width = event.width
+        self.height = event.height
         logging.debug(('width', self.width, 'height', self.height))
         self.image = self.resize_image()
         self.tk_image = ImageTk.PhotoImage(self.image)
-        self.panel.configure(image=self.tk_image)
+        # borderwidth=0 prevents cascade of redraw events/hacking dimensions.
+        self.panel.configure(image=self.tk_image, borderwidth=0)
 
     def run(self):
         """Enter non-terminating main loop, scheduling image updates."""

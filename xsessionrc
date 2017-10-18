@@ -1,3 +1,4 @@
+# Sample .xsessionrc file to start up 4velma from a card reader.
 CONDA_BIN=${HOME}/miniconda3/bin
 VELMA_HOME=${HOME}/Documents/4velma
 VELMA_PICS=/mnt/DCIM/101_PANA

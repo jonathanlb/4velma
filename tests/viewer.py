@@ -47,4 +47,4 @@ class ViewerTestCases(unittest.TestCase):
         logging.debug('{}x{} ({}) to {}x{} ({})'.format(img.width, img.height, original_aspect, scaled_image.width, scaled_image.height, scaled_aspect))
         self.assertTrue(scaled_image.width == v.width or scaled_image.height == v.height,
                         'expecting either height or width of image to be screen size')
-        self.assertAlmostEqual(original_aspect, scaled_aspect, places=3, msg='scaling preserves aspect')
+        self.assertAlmostEqual(original_aspect, scaled_aspect, places=2, msg='scaling preserves aspect')

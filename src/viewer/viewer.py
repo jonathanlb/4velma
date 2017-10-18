@@ -8,15 +8,21 @@ from PIL import Image, ImageTk
 
 
 class Viewer:
+    # Keep references to images to prevent GC from reclaiming from tkinter.
+    background = 'black'
+    """Scaled image to display"""
+    display_image = None
     height = None
     image_idx = 0
-    """Keep reference to image to prevent tkinter from cleaning it up."""
+    """Image read from disk"""
     image = None
     panel = None
+    """Scaled image to for TK"""
     tk_image = None
     width = None
 
-    def __init__(self, directory, seconds, full_screen=False, log_level=logging.INFO, tk_root=None):
+    def __init__(self, directory, seconds, full_screen=False,
+                 log_level=logging.INFO, tk_root=None):
         self.directory = directory
         self.seconds = seconds
         if tk_root:
@@ -30,7 +36,7 @@ class Viewer:
             self.width = self.root.winfo_screenwidth()
             self.height = self.root.winfo_screenheight()
 
-        self.root.configure(bg='black', highlightthickness=0)
+        self.root.configure(bg=self.background, highlightthickness=0)
 
         # TODO: no global config
         logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
@@ -48,22 +54,26 @@ class Viewer:
         self.root.after(self.seconds*1000, self.display_loop)
 
     def display_next(self):
-        """Configure the root pane if necessary and load the next image into rotation."""
+        """
+        Configure the root pane if necessary and load the next image
+        into rotation.
+        """
         self.image = self.next_image()
         if self.width and self.height:
-            self.image = self.resize_image()
+            self.displayed_image = self.resize_image()
         else:
+            self.displayed_image = self.image
             self.height = self.image.height
             self.width = self.image.width
 
-        if not self.tk_image:
-            self.tk_image = ImageTk.PhotoImage(self.image)
+        self.tk_image = ImageTk.PhotoImage(self.displayed_image)
+
+        if not self.panel:
             self.panel = tk.Label(self.root, image=self.tk_image)
             self.panel.bind('<Configure>', self.resize_window)
             self.panel.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
-        else:
-            self.tk_image = ImageTk.PhotoImage(self.image)
-            self.panel.configure(image=self.tk_image)
+
+        self.panel.configure(bg=self.background, image=self.tk_image)
 
     def get_filenames(self):
         """Scan the image directory for image file names."""
@@ -77,7 +87,10 @@ class Viewer:
             self.root.quit()
 
     def next_image(self, idx=None):
-        """Load the next image in the directory using the current view of the directory."""
+        """
+        Load the next image in the directory using the current view of
+        the directory.
+        """
         filenames = self.get_filenames()
         if len(filenames) <= 0:
             raise Exception('No files found in {}'.format(self.directory))
@@ -93,27 +106,34 @@ class Viewer:
         return Image.open(filename)
 
     def resize_image(self, image=None):
-        """TODO: ensure aspect ratio is preserved."""
+        """
+        Resize the active image, or the image argument to fill the
+        viewing area.
+        """
         if image is None:
             image = self.image
-        image_ratio = image.height / image.width
-        viewer_ratio = self.height / self.width
-        if image_ratio < viewer_ratio:
-            return image.resize((int(image_ratio * self.height), self.height), Image.BICUBIC)
+ 
+        render_width = int(self.height * image.width / image.height)
+        render_height = int(self.width * image.height / image.width)
+
+        if (render_width > self.width):
+           render_width = self.width
         else:
-            return image.resize((self.width, int(image_ratio * self.width)), Image.BICUBIC)
+           render_height = self.height
+
+        logging.debug(('resize', render_width, render_height))
+        return image.resize((render_width, render_height), Image.BICUBIC)
 
     def resize_window(self, event):
-        """
-        Respond to tkinter resizing events.
-        """
+        """Respond to tkinter resizing events."""
         self.width = event.width
         self.height = event.height
         logging.debug(('width', self.width, 'height', self.height))
-        self.image = self.resize_image()
-        self.tk_image = ImageTk.PhotoImage(self.image)
+        self.displayed_image = self.resize_image()
+        self.tk_image = ImageTk.PhotoImage(self.displayed_image)
         # borderwidth=0 prevents cascade of redraw events/hacking dimensions.
-        self.panel.configure(image=self.tk_image, borderwidth=0)
+        self.panel.configure(bg=self.background, borderwidth=0,
+                             image=self.tk_image)
 
     def run(self):
         """Enter non-terminating main loop, scheduling image updates."""

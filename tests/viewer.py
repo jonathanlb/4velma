@@ -8,8 +8,9 @@ class ViewerTestCases(unittest.TestCase):
     display_images = True
     root_tk = tk.Tk()
 
-    def create_viewer(self):
-        data_dir = path.join(path.dirname(__file__), 'data')
+    def create_viewer(self, data_dir=None):
+        if not data_dir:
+            data_dir = path.join(path.dirname(__file__), 'data')
         return Viewer(data_dir, 1, full_screen=True, log_level=logging.DEBUG, tk_root=self.root_tk)
 
     def test_viewer_init(self):
@@ -21,6 +22,12 @@ class ViewerTestCases(unittest.TestCase):
         v = self.create_viewer()
         filenames = v.get_filenames()
         self.assertEqual(4, len(filenames), 'failed to find expected number of images')
+
+    def test_check_no_images(self):
+        """Check error handling when no images present."""
+        # Point to some directory w/o pictues.
+        v = self.create_viewer(data_dir=path.dirname(__file__))
+        self.assertRaises(Exception, v.next_image)
 
     def test_viewer_display(self):
         """Cycle through images to display."""

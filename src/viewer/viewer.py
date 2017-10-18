@@ -40,7 +40,7 @@ class Viewer:
     def _is_image_(filename):
         """Image file predicate."""
         suffixes = ['.gif', '.jpg', '.png']
-        return any(x for x in suffixes if filename.suffix == x)
+        return any(x for x in suffixes if filename.suffix.lower() == x)
 
     def display_loop(self):
         """Display the next image and schedule next step of looping."""
@@ -79,6 +79,8 @@ class Viewer:
     def next_image(self, idx=None):
         """Load the next image in the directory using the current view of the directory."""
         filenames = self.get_filenames()
+        if len(filenames) <= 0:
+            raise Exception('No files found in {}'.format(self.directory))
 
         if idx is None:
             # Prevent out-of-bounds when files are removed.

@@ -81,9 +81,18 @@ class Viewer:
         return [x for x in p.iterdir() if not x.is_dir() and self._is_image_(x)]
 
     def handle_keypress(self, event):
-        """Allow the user to quit with Q/q."""
-        logging.debug(('click', event, event.char))
-        if event.char.lower() == 'q':
+        """
+        Allow the user to quit with q; advance picture with f or space;
+        replay last with d.  Ignore case.
+        """
+        logging.debug(('key', event, event.char))
+        cmd = event.char.lower()
+        if cmd == 'd':
+            self.image_idx -= 2
+            self.display_next()
+        elif cmd == 'f' or cmd == ' ':
+            self.display_next()
+        elif cmd == 'q':
             self.root.quit()
 
     def next_image(self, idx=None):

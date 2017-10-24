@@ -4,6 +4,7 @@
 import argparse
 import logging
 from os import path
+import pathlib
 import re
 import shutil
 import time
@@ -28,7 +29,12 @@ class Mover(FileSystemEventHandler):
         else:
             return f
 
+    def _add_dir_(self, dir_name):
+        for f in pathlib.os.listdir(dir_name):
+            self._add_file_(f)
+
     def _add_file_(self, file_name):
+        logging.info('adding {}'.format(file_name))
         self.files[file_name] = file_name
         return
 
@@ -69,6 +75,7 @@ class Mover(FileSystemEventHandler):
         return parser.parse_args()
 
     def run(self):
+        self._add_dir_(self.output)
         observer = Observer()
         observer.schedule(self, self.input, recursive=True)
         observer.start()

@@ -5,10 +5,13 @@ When my family started using digital cameras, we nearly stopped printing picture
 
 4velma is a python script to display images, targeted at Raspberry Pi connected to a TV.  The idea is to take a Raspberry Pi and HDMI cable to my grandma's house, plug it in, and let her see pictures.  Grandma seems to be able to browse channels, but I thought that navigating through the USB file viewer on her Smart TV might be too much....
 
+4velma comes with a script to monitor your SD-card reader for new files, copying new files for viewing.
+
 ## Dependencies
 - Python 3.5:  Your mileage may vary with other versions.
 - Pillow:  Read, display, and scale images.
 - tkinter: Window (mis)management.
+- watchdog: Monitor SD-card mount point for updates.
 - *optional:* Anaconda, virtualenv, etc....
 
 ## Installation
@@ -30,8 +33,9 @@ If you just want to kick the tires...
 python 4velma.py -i /path/to/your/pictures -d 10
 ```
 
-Closing the window or typing 'q' will terminate the script.
+Closing the window or typing 'q' will terminate the script.  Replay or advance photos with 'd' and 'f' keys.
+
+The script ```import_pics.py``` will watch a directory (SD-card mount point) and copy the contents to the directory watched by ```4velma.py```.
 
 ## Todo
-- Quit full-screen mode cleanly.
-- Document how to prevent Raspberry Pi from sleeping video.
+- Test montitoring of mount point.

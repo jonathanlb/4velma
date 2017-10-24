@@ -6,7 +6,6 @@ import unittest
 
 
 class MoverTestCases(unittest.TestCase):
-    ## set up python env to incorporate watchdog-- cli does...
     init_logging(logging.DEBUG)
 
     def test_mover_init(self):

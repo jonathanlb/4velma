@@ -1,6 +1,7 @@
 # Copyright (c) 2017 Jonathan Bredin
 # MIT license http://opensource.org/licenses/MIT
 
+import argparse
 import logging
 from pathlib import Path
 import tkinter as tk
@@ -22,7 +23,7 @@ class Viewer:
     width = None
 
     def __init__(self, directory, seconds, full_screen=False,
-                 log_level=logging.INFO, tk_root=None):
+                 tk_root=None):
         self.directory = directory
         self.seconds = seconds
         if tk_root:
@@ -33,14 +34,11 @@ class Viewer:
 
         if full_screen:
             self.root.wm_overrideredirect(True)
+            # self.root.attributes('-fullscreen', True)
             self.width = self.root.winfo_screenwidth()
             self.height = self.root.winfo_screenheight()
 
         self.root.configure(bg=self.background, highlightthickness=0)
-
-        # TODO: no global config
-        logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
-                            level=log_level)
 
     @staticmethod
     def _is_image_(filename):
@@ -149,3 +147,15 @@ class Viewer:
         self.display_loop()
         logging.info('Entering tkinter main loop.')
         self.root.mainloop()
+
+    @staticmethod
+    def parse_args():
+        parser = argparse.ArgumentParser(
+            description='Display pictures for your grandma.')
+        parser.add_argument('--fullscreen', '-f', dest='fullscreen',
+                            action='store_true', help='scale to use full screen')
+        parser.add_argument('--input', '-i',
+                            required=True, help='directory containing images')
+        parser.add_argument('--duration', '-d', type=int, default=60,
+                            required=False, help='display pictures for n seconds, default 60s')
+        return parser.parse_args()

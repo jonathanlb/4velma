@@ -1,17 +1,20 @@
 import logging
 from os import path
 from src.viewer import Viewer
+from src.viewer.logging import init_logging
 import tkinter as tk
 import unittest
+
 
 class ViewerTestCases(unittest.TestCase):
     display_images = True
     root_tk = tk.Tk()
+    init_logging(logging.DEBUG)
 
     def create_viewer(self, data_dir=None):
         if not data_dir:
             data_dir = path.join(path.dirname(__file__), 'data')
-        return Viewer(data_dir, 1, full_screen=True, log_level=logging.DEBUG, tk_root=self.root_tk)
+        return Viewer(data_dir, 1, full_screen=True, tk_root=self.root_tk)
 
     def test_viewer_init(self):
         """Instantiate a viewer."""

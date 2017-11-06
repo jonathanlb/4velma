@@ -11,11 +11,21 @@ When my family started using digital cameras, we nearly stopped printing picture
 - Python 3.5:  Your mileage may vary with other versions.
 - Pillow:  Read, display, and scale images.
 - tkinter: Window (mis)management.
-- watchdog: Monitor SD-card mount point for updates.
 - *optional:* Anaconda, virtualenv, etc....
+- [at](https://en.wikipedia.org/wiki/At_(Unix)): Useful in scheduling SD-card copy commands from udev.
+- [udev](https://en.wikipedia.org/wiki/Udev): Watch for SD-card mount to copy new files.
 
 ## Installation
-Download 4velma, create a virtual environment, and edit your xsessionrc file to start up 4velma.
+If you just want to kick the tires...
+
+```sh
+python 4velma.py -i /path/to/your/pictures -d 10
+```
+
+Closing the window or typing 'q' will terminate the script.  Replay or advance photos with 'd' and 'f' keys.
+
+For more permanent installation, after downloading 4velma, create a virtual environment and edit your xsessionrc file to start up 4velma.
+
 
 ```sh
 git clone https://github.com/jonathanlb/4velma
@@ -27,15 +37,11 @@ conda install Pillow
 cat xsessionrc >> ${HOME}/.xsessionrc
 ```
 
-If you just want to kick the tires...
+In order to watch for new pictures on an SD card
 
-```sh
-python 4velma.py -i /path/to/your/pictures -d 10
 ```
-
-Closing the window or typing 'q' will terminate the script.  Replay or advance photos with 'd' and 'f' keys.
-
-The script ```import_pics.py``` will watch a directory (SD-card mount point) and copy the contents to the directory watched by ```4velma.py```.
-
-## Todo
-- Test montitoring of mount point.
+# install at to defer execution of SD read and copy commands.
+sudo apt-get install at
+# edit path variables in 99-local.rules so udev can read and copy camera images.
+cat 99-local.rules >> /etc/udev/rules.d/99-local.rules
+```

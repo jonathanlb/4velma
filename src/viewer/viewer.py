@@ -3,7 +3,9 @@
 
 import argparse
 import logging
+import os
 from pathlib import Path
+from tkinter import filedialog
 import tkinter as tk
 from PIL import Image, ImageTk
 
@@ -39,6 +41,8 @@ class Viewer:
             self.height = self.root.winfo_screenheight()
 
         self.root.configure(bg=self.background, highlightthickness=0)
+        self.displayed_image = None
+        self.image = None
 
     @staticmethod
     def _is_image_(filename):
@@ -92,6 +96,8 @@ class Viewer:
             self.display_next()
         elif cmd == 'q':
             self.root.quit()
+        elif cmd == '\x7f' or cmd == '\x08':
+            self.show_delete()
 
     def next_image(self, idx=None):
         """
@@ -123,10 +129,10 @@ class Viewer:
         render_width = int(self.height * image.width / image.height)
         render_height = int(self.width * image.height / image.width)
 
-        if (render_width > self.width):
-           render_width = self.width
+        if render_width > self.width:
+            render_width = self.width
         else:
-           render_height = self.height
+            render_height = self.height
 
         logging.debug(('resize', render_width, render_height))
         return image.resize((render_width, render_height), Image.BICUBIC)
@@ -147,6 +153,28 @@ class Viewer:
         self.display_loop()
         logging.info('Entering tkinter main loop.')
         self.root.mainloop()
+
+    def show_delete(self):
+        """
+        Show a dialog to preview and delete files.
+        TODO: Replace 'Open' label on button with delete.
+        TODO: Show title on dialog.  filedialog rot?
+        TODO: Limit to image types under selected directory.
+        """
+        files = filedialog.askopenfiles(
+            initialdir=self.directory,
+            parent=self.root,
+            mode='rb',
+            title='Select files to delete...')
+        if files:
+            for file in files:
+                file_name = file.name
+                logging.info('deleting {}'.format(file_name))
+                try:
+                    os.remove(file_name)
+                except OSError as ose:
+                    logging.error('cannot delete {}: {}'.format(file_name, ose))
+            self.display_next()
 
     @staticmethod
     def parse_args():

@@ -5,15 +5,15 @@ When my family started using digital cameras, we nearly stopped printing picture
 
 4velma is a python script to display images, targeted at Raspberry Pi connected to a TV.  The idea is to take a Raspberry Pi and HDMI cable to my grandma's house, plug it in, and let her see pictures.  Grandma seems to be able to browse channels, but I thought that navigating through the USB file viewer on her Smart TV might be too much....
 
-4velma comes with a script to monitor your SD-card reader for new files, copying new files for viewing.
+4velma comes with a script which udev can execute when new files appear in the SD-card reader, copying new files for viewing.
 
 ## Dependencies
 - Python 3.5:  Your mileage may vary with other versions.
 - Pillow:  Read, display, and scale images.
 - tkinter: Window (mis)management.
 - *optional:* Anaconda, virtualenv, etc....
-- [at](https://en.wikipedia.org/wiki/At_(Unix)): Useful in scheduling SD-card copy commands from udev.
-- [udev](https://en.wikipedia.org/wiki/Udev): Watch for SD-card mount to copy new files.
+- *optional:* [at](https://en.wikipedia.org/wiki/At_(Unix)): Schedule SD-card copy commands from udev.
+- *optional:* [udev](https://en.wikipedia.org/wiki/Udev): Watch for SD-card mount to copy new files.
 
 ## Installation
 If you just want to kick the tires...
@@ -21,8 +21,6 @@ If you just want to kick the tires...
 ```sh
 python 4velma.py -i /path/to/your/pictures -d 10
 ```
-
-Closing the window or typing 'q' will terminate the script.  Replay or advance photos with 'd' and 'f' keys.
 
 For more permanent installation, after downloading 4velma, create a virtual environment and edit your xsessionrc file to start up 4velma.
 
@@ -37,7 +35,7 @@ conda install Pillow
 cat xsessionrc >> ${HOME}/.xsessionrc
 ```
 
-In order to watch for new pictures on an SD card
+In order to watch for new pictures on an SD card:
 
 ```
 # install at to defer execution of SD read and copy commands.
@@ -45,3 +43,10 @@ sudo apt-get install at
 # edit path variables in 99-local.rules so udev can read and copy camera images.
 cat 99-local.rules >> /etc/udev/rules.d/99-local.rules
 ```
+
+## Controls
+
+- 'd' replay previous photo.
+- 'f' advance to next photos.
+- 'q' or closing the window to quit.
+- backspace/delete show dialog to delete photos.

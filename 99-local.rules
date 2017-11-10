@@ -1,1 +1,0 @@
-ACTION=="add", KERNEL=="sdb*", SUBSYSTEM=="block", RUN+="/bin/sh -c 'echo /home/pi/Documents/4velma/import.sh | at now 2>/tmp/udev.txt'"

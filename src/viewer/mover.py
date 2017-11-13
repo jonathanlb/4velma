@@ -10,7 +10,8 @@ from pathlib import Path
 
 class Mover:
   """
-  Strategy: monitor directory for changes
+  Monitor /proc/self/mounts or other mount table for changes,
+  copying new image files upon updates.
   """
   def __init__(self, src_dir, snk_dir, mounts='/proc/self/mounts'):
     self.src_dir = src_dir
@@ -23,6 +24,9 @@ class Mover:
     return
 
   def __exit__(self, type, value, traceback):
+    """
+    Close up the mount table file handle for interruption.
+    """
     self._close_polling_()
  
   def _close_polling_(self):
@@ -32,9 +36,11 @@ class Mover:
       self.pollster = None
 
   def _get_time_(self):
+    """Return system epoch millis."""
     return int(time.clock() * 1000)
 
   def copy_files(self):
+    """Shell out a command to search and copy new image files."""
     exec_cmd = '-exec cp -n -v {} ' + self.snk_dir + ' ;'
     cmd = 'find ' + self.src_dir + \
       ' -type f -iname *.jpg ' + exec_cmd + \
@@ -58,12 +64,19 @@ class Mover:
       raise IOError('calling "{}" : {}'.format(cmd, stderr))
 
   def is_input_mounted(self, mount_fd):
+    """Check the mount table to see if the mount point is active."""
     f = open(mount_fd, 'r')
     lines = f.readlines()
     f.close()
-    return any(line.find(self.src_dir) >= 0 for line in lines)
+    # Use next(iter(slice)) to pull out second column of mount table,
+    # defaulting to /dev/null (no path should start with that) upon garbage
+    return any(self.src_dir.startswith(next(iter(line.split()[1:2]), '/dev/null'))
+            for line in lines)
 
   def run(self, poll_millis=60000):
+    """
+    Poll mount table for card insertion, copying files when the card appears.
+    """
     try:
       while True:
         while not self.mount_wait(poll_millis, wait_for_mounted=True):
@@ -75,7 +88,7 @@ class Mover:
       logging.info('Interrupted, shutting down')
 
   def mount_wait(self, millis, wait_for_mounted=True):
-
+    """Wait for updates to the mount table."""
     waited = 0
     while waited <= millis:
       start_millis = self._get_time_()

@@ -54,7 +54,7 @@ class MoverTestCases(unittest.TestCase):
       self.assertFalse(path.exists(snk_filename),
         msg='File copied before simulated mount')
       f = open(self.mounts, 'a')
-      f.write('blah blah\n')
+      f.write('blah blah\n/dev/sdb1 ')
       f.write(path.join(self.mount_dir, card_dir_name))
       f.write('\nyadda yadda yadda\n')
       f.close()

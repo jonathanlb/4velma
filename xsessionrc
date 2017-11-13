@@ -1,6 +1,6 @@
 # Sample .xsessionrc file to start up 4velma from a card reader.
 CONDA_BIN=${HOME}/miniconda3/bin
-SD_PICS=/mnt/DCIM/101_PANA
+SD_PICS=/mnt/card
 VELMA_HOME=${HOME}/Documents/4velma
 VELMA_PICS=${HOME}/Pictures
 
@@ -10,7 +10,7 @@ MONITOR_SCRIPT="source ${CONDA_BIN}/activate 4velma && python ${VELMA_HOME}/impo
 
 
 echo "Preventing monitor power down...."
-setterm -blank 0 -powerdown 0
+setterm -powerdown 0
 echo "${MONITOR_SCRIPT}" > ${LOG}
 echo "${VELMA_SCRIPT}" >> ${LOG}
 /bin/bash -c "${VELMA_SCRIPT}" 2>> ${LOG} &

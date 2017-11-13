@@ -1,7 +1,7 @@
 # 4velma
 View images on a Raspberry Pi using your TV.
 
-When my family started using digital cameras, we nearly stopped printing pictures. We outside of a holiday card, we sharing pictures using the display on the phone or the camera producing the image. My grandma Velma ended up with fewer pictures to look at.  Worse, yet, the displays we use to share are tiny!
+When my family started using digital cameras, we nearly stopped printing pictures. We, outside of a holiday card, only shared pictures using the display on the phone or the camera producing the image. My grandma Velma ended up with fewer pictures to look at.  Worse, yet, the displays we use to share are tiny!
 
 4velma is a python script to display images, targeted at Raspberry Pi connected to a TV.  The idea is to take a Raspberry Pi and HDMI cable to my grandma's house, plug it in, and let her see pictures.  Grandma seems to be able to browse channels, but I thought that navigating through the USB file viewer on her Smart TV might be too much....
 
@@ -10,21 +10,10 @@ When my family started using digital cameras, we nearly stopped printing picture
 ## Dependencies
 - Python 3.5:  Your mileage may vary with other versions.
 - Pillow:  Read, display, and scale images.
-- tkinter: Window (mis)management.
+- tkinter: Window management.
 - *optional:* Anaconda, virtualenv, etc....
-- *optional:* [at](https://en.wikipedia.org/wiki/At_(Unix)): Schedule SD-card copy commands from udev.
-- *optional:* [udev](https://en.wikipedia.org/wiki/Udev): Watch for SD-card mount to copy new files.
 
 ## Installation
-If you just want to kick the tires...
-
-```sh
-python 4velma.py -i /path/to/your/pictures -d 10
-```
-
-For more permanent installation, after downloading 4velma, create a virtual environment and edit your xsessionrc file to start up 4velma.
-
-
 ```sh
 git clone https://github.com/jonathanlb/4velma
 cd 4velma
@@ -35,13 +24,14 @@ conda install Pillow
 cat xsessionrc >> ${HOME}/.xsessionrc
 ```
 
-In order to watch for new pictures on an SD card:
-
+The following command, for example, will cycle through the pictures every 10 seconds.
+```sh
+python 4velma.py -i /path/to/your/pictures -d 10
 ```
-# install at to defer execution of SD read and copy commands.
-sudo apt-get install at
-# edit path variables in 99-local.rules so udev can read and copy camera images.
-cat 99-local.rules >> /etc/udev/rules.d/99-local.rules
+
+The will watch a mount point and copy new jpeg pictures to your picture directory.
+```sh
+python import.py -i /mnt/card -o /path/to/your/pictures
 ```
 
 ## Controls
@@ -50,3 +40,21 @@ cat 99-local.rules >> /etc/udev/rules.d/99-local.rules
 - 'f' advance to next photos.
 - 'q' or closing the window to quit.
 - backspace/delete show dialog to delete photos.
+
+## Troubleshooting
+### Python Environments
+- Use the latest version of conda.
+
+```
+conda update conda
+```
+### Mounting SD cards
+ - In ```/etc/fstab``` put
+```
+/dev/sdb1  /mnt/card  exfat-fuse ro,defaults,nofail,user,auto  0  0
+```  Your card reader may show up as /dev/sda1.  Edit the device and mount directory to suit.
+  - Install exfat-fuse to read Windows-formatted cards.
+  
+```
+sudo apt-get install extfat-fuse
+```

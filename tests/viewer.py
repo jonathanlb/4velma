@@ -42,7 +42,7 @@ class ViewerTestCases(unittest.TestCase):
 
     def test_scaling(self):
         v = self.create_viewer()
-        img = v.next_image(0)
+        img, _ = v.next_image(0)
         original_aspect = img.width / img.height
         scaled_image = v.resize_image(img)
         scaled_aspect = scaled_image.width / scaled_image.height

@@ -6,6 +6,7 @@ import logging
 import os
 from pathlib import Path
 from tkinter import filedialog
+from threading import RLock
 import tkinter as tk
 from PIL import Image, ImageTk
 
@@ -17,8 +18,10 @@ class Viewer:
     display_image = None
     height = None
     image_idx = 0
+    image_filename = None
     """Image read from disk"""
     image = None
+    lock = None
     panel = None
     """Scaled image to for TK"""
     tk_image = None
@@ -43,6 +46,8 @@ class Viewer:
         self.root.configure(bg=self.background, highlightthickness=0)
         self.displayed_image = None
         self.image = None
+        self.image_filename = None
+        self.lock = RLock()
 
     @staticmethod
     def _is_image_(filename):
@@ -60,7 +65,8 @@ class Viewer:
         Configure the root pane if necessary and load the next image
         into rotation.
         """
-        self.image = self.next_image()
+        self.lock.acquire()
+        self.image, self.image_filename = self.next_image()
         if self.width and self.height:
             self.displayed_image = self.resize_image()
         else:
@@ -76,6 +82,7 @@ class Viewer:
             self.panel.pack(side=tk.TOP, fill=tk.BOTH, expand=tk.YES)
 
         self.panel.configure(bg=self.background, image=self.tk_image)
+        self.lock.release()
 
     def get_filenames(self):
         """Scan the image directory for image file names."""
@@ -90,14 +97,20 @@ class Viewer:
         logging.debug(('key', event, event.char))
         cmd = event.char.lower()
         if cmd == 'd':
+            self.lock.acquire()
             self.image_idx -= 2
             self.display_next()
+            self.lock.release()
         elif cmd == 'f' or cmd == ' ':
             self.display_next()
         elif cmd == 'q':
             self.root.quit()
         elif cmd == '\x7f' or cmd == '\x08':
             self.show_delete()
+        elif cmd == '<':
+            self.rotate_image(self.image, self.image_filename, 90)
+        elif cmd == '>':
+            self.rotate_image(self.image, self.image_filename, -90)
 
     def next_image(self, idx=None):
         """
@@ -116,7 +129,7 @@ class Viewer:
 
         filename = filenames[idx]
         logging.debug(('loading image', filename, idx))
-        return Image.open(filename)
+        return Image.open(filename), filename
 
     def resize_image(self, image=None):
         """
@@ -148,6 +161,14 @@ class Viewer:
         self.panel.configure(bg=self.background, borderwidth=0,
                              image=self.tk_image)
 
+    def rotate_image(self, image, filename, degrees):
+        self.lock.acquire()
+        image = image.rotate(degrees, expand=True)
+        image.save(filename)
+        self.image_idx -= 1
+        self.display_next()
+        self.lock.release()
+
     def run(self):
         """Enter non-terminating main loop, scheduling image updates."""
         self.display_loop()
@@ -167,6 +188,7 @@ class Viewer:
             mode='rb',
             title='Select files to delete...')
         if files:
+            self.lock.acquire()
             for file in files:
                 file_name = file.name
                 logging.info('deleting {}'.format(file_name))
@@ -175,6 +197,7 @@ class Viewer:
                 except OSError as ose:
                     logging.error('cannot delete {}: {}'.format(file_name, ose))
             self.display_next()
+            self.lock.release()
 
     @staticmethod
     def parse_args():

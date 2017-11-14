@@ -40,6 +40,8 @@ python import.py -i /mnt/card -o /path/to/your/pictures
 - 'f' advance to next photos.
 - 'q' or closing the window to quit.
 - backspace/delete show dialog to delete photos.
+- '>' rotate image clockwise, overwriting original file.
+- '<' rotate image counter clockwise, overwriting original file.
 
 ## Troubleshooting
 ### Python Environments

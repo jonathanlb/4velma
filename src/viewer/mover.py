@@ -5,7 +5,6 @@ import argparse
 import logging
 import os, select, subprocess, time
 from operator import xor
-from pathlib import Path
 
 
 class Mover:
@@ -44,7 +43,7 @@ class Mover:
     exec_cmd = '-exec cp -n -v {} ' + self.snk_dir + ' ;'
     cmd = 'find ' + self.src_dir + \
       ' -type f -iname *.jpg ' + exec_cmd + \
-      ' -o -iname *.jpeg ' + exec_cmd;
+      ' -o -iname *.jpeg ' + exec_cmd
     proc = subprocess.Popen(
       cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stderr = ''

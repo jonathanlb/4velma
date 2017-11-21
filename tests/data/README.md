@@ -1,0 +1,2 @@
+# 4velma Test Data
+The images here are from [pixbay](https://pixabay.com) licensed under [CC0 Creative Commons](https://pixabay.com/en/service/terms/#usage) and serve to demonstrate scaling and resizing operations.

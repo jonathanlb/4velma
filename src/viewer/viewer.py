@@ -17,10 +17,8 @@ class Viewer:
     background = 'black'
     image_idx = 0
     image_filename = None
-    """Image read from disk"""
     image = None
     lock = None
-    panel = None
 
     def __init__(self, directory, seconds, full_screen=False,
                  tk_root=None):
@@ -33,6 +31,8 @@ class Viewer:
             self.root.bind('<Key>', self.handle_keypress)
 
         self._scaler = Scaler(self.root)
+        self._screen_width = self._scaler.get_width()
+        self._screen_height = self._scaler.get_height()
         self._scaler.background = self.background
         if full_screen:
             self.root.wm_overrideredirect(True)
@@ -79,7 +79,7 @@ class Viewer:
         self.__exit__(None, None, None)
         self.image, self.image_filename = self.next_image()
         # self._scaler.set_image(self.image)
-        self._scaler.resize((self.image.width, self.image.height), self.image)
+        self._scaler.resize(self.get_size(), self.image)
         self.lock.release()
         logging.debug('release display_next')
 
@@ -87,6 +87,10 @@ class Viewer:
         """Scan the image directory for image file names."""
         p = Path(self.directory)
         return [x for x in p.iterdir() if not x.is_dir() and self._is_image_(x)]
+
+    def get_size(self):
+        """Return dimensions of the picture constrained by the screen size."""
+        return min(self.image.width, self._screen_width), min(self.image.height, self._screen_height)
 
     def handle_keypress(self, event):
         """
